@@ -4,7 +4,7 @@ import (
 	"log"
 )
 
-func Gower(beginUrl string) (err error) {
+func Gowler(beginUrl string, maxDepth int) (err error) {
 
 	scrappedLinks, err := ScrapLinks(beginUrl)
 	log.Println(scrappedLinks)
