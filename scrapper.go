@@ -1,23 +1,10 @@
 package gowler
 
-import "net/http"
-import "log"
-import "os"
 import "io"
 import "code.google.com/p/go.net/html"
 
-func ScrapLinks(url string) (hyperlinks []string, err error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Println("Unable to perform get on the url %v", url)
-		os.Exit(1)
-	}
-	defer resp.Body.Close()
-	hyperLinks := aggregateAnchorLinks(resp.Body)
-	return hyperLinks, nil
-}
-
-func aggregateAnchorLinks(httpBody io.Reader) []string {
+func AggregateAnchorLinks(httpBody io.Reader) []string {
+	//TODO: Do not scrap relative anchors
 	links := make([]string, 0)
 	domPage := html.NewTokenizer(httpBody)
 	for {
