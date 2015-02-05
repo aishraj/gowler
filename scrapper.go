@@ -1,7 +1,7 @@
 package gowler
 
 import "io"
-import "code.google.com/p/go.net/html"
+import "golang.org/x/net/html"
 
 func AggregateAnchorLinks(httpBody io.Reader) []string {
 	//TODO: Do not scrap relative anchors

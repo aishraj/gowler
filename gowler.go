@@ -2,13 +2,14 @@ package gowler
 
 import (
 	"crypto/tls"
+	"github.com/PuerkitoBio/purell"
 	"log"
 	"net/http"
 	"os"
 )
 
-func Gowler(beginUrl string, maxDepth int) (err error) {
-	log.SetPrefix("gowler.go")
+func Gowler(beginUrl string, crawlDelay int) (err error) {
+	log.SetPrefix("gowler.go   ")
 	urlChannel := make(chan string)
 	go func() {
 		urlChannel <- beginUrl
@@ -21,8 +22,8 @@ func Gowler(beginUrl string, maxDepth int) (err error) {
 }
 
 func sanitizeUrl(url string) (resolvedLinks string) {
-	//TODO: Write a real function that does this task.
-	resolvedLinks = url
+	//Purell looks like the only library which does this efficiently.
+	resolvedLinks = purell.MustNormalizeURLString(url, purell.FlagsUsuallySafeGreedy)
 	return resolvedLinks
 }
 
