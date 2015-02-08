@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
 
-//TODO: accept a set of beginUrls instead
 func Gowler(beginUrls []string, crawlDelay int) (err error) {
 	log.SetPrefix("gowler.go ")
 	urlChannel := make(chan string)
@@ -34,15 +34,18 @@ func Gowler(beginUrls []string, crawlDelay int) (err error) {
 func sanitizeUrl(UrlString string) (resolvedLinks string) {
 	//Purell looks like the only library which does this efficiently.
 
-	resolvedLinks = purell.MustNormalizeURLString(UrlString, purell.FlagsUsuallySafeGreedy)
-	/*
-		if err != nil {
-			log.Println(err)
-		}*/
+	resolvedLinks, err := purell.NormalizeURLString(UrlString, purell.FlagsUsuallySafeGreedy)
+
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
 	return resolvedLinks
 }
 
 func ScrapLinks(UrlString string, urlChannel chan string) {
+
+	urlTimeMap := make(map[string]time.Time)
 	UrlString, err := validateUrl(UrlString)
 	if err != nil {
 		log.Println("The given urn %s is invalid.", UrlString)
@@ -79,11 +82,21 @@ func ScrapLinks(UrlString string, urlChannel chan string) {
 
 	// Now regarding the frontier :
 	// The frontier should be : - asynchrounus, should have a logic for ageing.
+	// It should also respect the crawl delay.
 	//lets use a domain based re-visit policy, with aging for now.
 	for _, link := range hyperLinks {
-		go func() {
-			urlChannel <- link
-		}()
+		lastSeenTime, exists := urlTimeMap[link]
+		if exists {
+			durartion := time.Since(lastSeenTime)
+			if durartion.Hours() < 3 {
+				continue
+			}
+		} else {
+			urlTimeMap[link] = time.Now()
+			go func() {
+				urlChannel <- link
+			}()
+		}
 	}
 }
 
